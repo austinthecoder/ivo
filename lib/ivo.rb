@@ -1,7 +1,7 @@
 require "ivo/version"
 
 module Ivo
-  def self.new(*attrs)
+  def self.new(*attrs, &block)
     # a: nil, b: nil
     keyword_args = attrs.map { |attr| "#{attr}: nil" }.join ', '
 
@@ -28,7 +28,7 @@ module Ivo
 
       attr_reader *attrs
 
-      yield if block_given?
+      class_eval &block if block
     end
   end
 end
