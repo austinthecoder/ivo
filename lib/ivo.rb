@@ -14,7 +14,7 @@ module Ivo
 
     equality_check = begin
       checks = ['self.class == other.class']
-      checks = attrs.each { checks << "#{attr} == other.#{attr}" }
+      attrs.each { |attr| checks << "#{attr} == other.#{attr}" }
       checks.join ' && '
     end
 
