@@ -1,4 +1,5 @@
 require "ivo/version"
+require 'ivo/value'
 
 module Ivo
   def self.new(*attrs, &block)
@@ -50,5 +51,9 @@ module Ivo
 
       class_eval &block if block
     end
+  end
+
+  def self.call(attrs = nil)
+    Value.new attrs
   end
 end

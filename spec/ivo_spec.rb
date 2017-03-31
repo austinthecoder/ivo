@@ -4,6 +4,12 @@ Dog = Ivo.new :name, :age do
   end
 end
 
+dogs = [
+  Dog.new('Fido', 5),
+  Dog.new('Fido', 5),
+  Dog.new('Spot', 5),
+]
+
 module Animals
   Dog = Ivo.new :name, :age do
     def speak
@@ -11,6 +17,18 @@ module Animals
     end
   end
 end
+
+animals_dogs = [
+  Animals::Dog.new('Fido', 5),
+  Animals::Dog.new('Fido', 5),
+  Animals::Dog.new('Spot', 5),
+]
+
+instant_dogs = [
+  Ivo.(name: 'Fido', age: 5),
+  Ivo.(name: 'Fido', age: 5),
+  Ivo.(name: 'Spot', age: 5),
+]
 
 RSpec.describe Ivo do
   describe '.new' do
@@ -30,30 +48,76 @@ RSpec.describe Ivo do
   end
 end
 
-[Dog, Animals::Dog].each do |dog_class|
-  RSpec.describe dog_class do
-    before do
-      @dog = dog_class.new 'Fido', 5
-    end
+RSpec.describe Dog do
+  it 'is immutable' do
+    expect(dogs[0]).to be_frozen
+  end
 
-    it 'is immutable' do
-      expect(@dog).to be_frozen
-    end
+  it 'has a name' do
+    expect(dogs[0].name).to eq 'Fido'
+  end
 
-    it 'has a name' do
-      expect(@dog.name).to eq 'Fido'
-    end
+  it 'has an age' do
+    expect(dogs[0].age).to eq 5
+  end
 
-    it 'has an age' do
-      expect(@dog.age).to eq 5
-    end
+  it 'can speak' do
+    expect(dogs[0].speak).to eq 'bark!'
+  end
 
-    it 'can speak' do
-      expect(@dog.speak).to eq 'bark!'
-    end
+  it 'is equal to the same dog' do
+    expect(dogs[0]).to eq dogs[1]
+  end
 
-    it 'is equal to the same dog' do
-      expect(@dog).to eq dog_class.new('Fido', 5)
-    end
+  it 'is not equal to a different dog' do
+    expect(dogs[0]).to_not eq dogs[2]
+  end
+end
+
+RSpec.describe Animals::Dog do
+  it 'is immutable' do
+    expect(animals_dogs[0]).to be_frozen
+  end
+
+  it 'has a name' do
+    expect(animals_dogs[0].name).to eq 'Fido'
+  end
+
+  it 'has an age' do
+    expect(animals_dogs[0].age).to eq 5
+  end
+
+  it 'can speak' do
+    expect(animals_dogs[0].speak).to eq 'bark!'
+  end
+
+  it 'is equal to the same dog' do
+    expect(animals_dogs[0]).to eq animals_dogs[1]
+  end
+
+  it 'is not equal to a different dog' do
+    expect(animals_dogs[0]).to_not eq animals_dogs[2]
+  end
+end
+
+RSpec.describe 'Value' do
+  it 'is immutable' do
+    expect(instant_dogs[0]).to be_frozen
+  end
+
+  it 'has a name' do
+    expect(instant_dogs[0].name).to eq 'Fido'
+  end
+
+  it 'has an age' do
+    expect(instant_dogs[0].age).to eq 5
+  end
+
+  it 'is equal to the same dog' do
+    expect(instant_dogs[0]).to eq instant_dogs[1]
+  end
+
+  it 'is not equal to a different dog' do
+    expect(instant_dogs[0]).to_not eq instant_dogs[2]
   end
 end
