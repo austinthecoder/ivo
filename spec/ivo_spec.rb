@@ -51,5 +51,9 @@ end
     it 'can speak' do
       expect(@dog.speak).to eq 'bark!'
     end
+
+    it 'is equal to the same dog' do
+      expect(@dog).to eq dog_class.new('Fido', 5)
+    end
   end
 end
