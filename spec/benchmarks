@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require 'ivo'
+require "benchmark"
+require "values"
+
+name = 'Fido'
+age = 5
+attrs = {name: name, age: age}
+
+IvoValue = Ivo.new :name, :age
+ivo_value_inst = IvoValue.new name, age
+
+ValuesValue = Value.new :name, :age
+values_value_inst = ValuesValue.new name, age
+
+ivo_value = Ivo.(attrs)
+
+n = 100
+
+Benchmark.bm do |x|
+  x.report('Class.new') { n.times { Class.new } }
+  x.report('Ivo.new') { n.times { Ivo.new :name, :age } }
+  x.report('Value.new') { n.times { Value.new :name, :age } }
+end
+
+n = 1_000_000
+
+Benchmark.bm do |x|
+  x.report('Object.new') { n.times { Object.new } }
+  x.report('Ivo.new.new') { n.times { IvoValue.new name, age } }
+  x.report('Value.new.new') { n.times { ValuesValue.new name, age } }
+  puts '-' * 40
+  x.report('Ivo.new.with') { n.times { IvoValue.with attrs } }
+  x.report('Value.new.with') { n.times { ValuesValue.with attrs } }
+  puts '-' * 40
+  x.report('Ivo.new.new.method') { n.times { ivo_value_inst.name } }
+  x.report('Value.new.new.method') { n.times { values_value_inst.name } }
+  puts '-' * 40
+  x.report('Ivo.()') { n.times { Ivo.(attrs) } }
+  x.report('Ivo.().method') { n.times { ivo_value.name } }
+end

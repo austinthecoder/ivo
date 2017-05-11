@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
-
-# Specify your gem's dependencies in ivo.gemspec
-gemspec
+source 'https://rubygems.org' do
+  gemspec
+  gem 'values'
+end
