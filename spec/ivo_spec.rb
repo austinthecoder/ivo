@@ -1,4 +1,6 @@
-Dog = Ivo.new :name, :age do
+class Dog
+  include Ivo.value :name, :age
+
   def speak
     "bark!"
   end
@@ -8,20 +10,6 @@ dogs = [
   Dog.new('Fido', 5),
   Dog.new('Fido', 5),
   Dog.new('Spot', 5),
-]
-
-module Animals
-  Dog = Ivo.new :name, :age do
-    def speak
-      "bark!"
-    end
-  end
-end
-
-animals_dogs = [
-  Animals::Dog.new('Fido', 5),
-  Animals::Dog.new('Fido', 5),
-  Animals::Dog.new('Spot', 5),
 ]
 
 instant_dogs = [
@@ -49,6 +37,11 @@ RSpec.describe Ivo do
 end
 
 RSpec.describe Dog do
+  it 'can be instantiated with a hash' do
+    dog = Dog.with name: 'Austin'
+    expect(dog.name).to eq 'Austin'
+  end
+
   it 'is immutable' do
     expect(dogs[0]).to be_frozen
   end
@@ -71,32 +64,6 @@ RSpec.describe Dog do
 
   it 'is not equal to a different dog' do
     expect(dogs[0]).to_not eq dogs[2]
-  end
-end
-
-RSpec.describe Animals::Dog do
-  it 'is immutable' do
-    expect(animals_dogs[0]).to be_frozen
-  end
-
-  it 'has a name' do
-    expect(animals_dogs[0].name).to eq 'Fido'
-  end
-
-  it 'has an age' do
-    expect(animals_dogs[0].age).to eq 5
-  end
-
-  it 'can speak' do
-    expect(animals_dogs[0].speak).to eq 'bark!'
-  end
-
-  it 'is equal to the same dog' do
-    expect(animals_dogs[0]).to eq animals_dogs[1]
-  end
-
-  it 'is not equal to a different dog' do
-    expect(animals_dogs[0]).to_not eq animals_dogs[2]
   end
 end
 

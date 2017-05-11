@@ -3,6 +3,14 @@ require 'ivo/value'
 
 module Ivo
   def self.new(*attrs, &block)
+    Class.new do
+      include Ivo.value *attrs
+
+      class_eval &block if block
+    end
+  end
+
+  def self.value(*attrs)
     # a: nil, b: nil
     keyword_args = attrs.map { |attr| "#{attr}: nil" }.join ', '
 
@@ -22,8 +30,14 @@ module Ivo
     hash = attrs.map { |attr| "#{attr}.hash" }.join ' ^ '
 
     code = <<~RUBY
-      def self.with(#{keyword_args})
-        new #{attrs.join ', '}
+      def self.included(base)
+        base.extend ClassMethods
+      end
+
+      module ClassMethods
+        def with(#{keyword_args})
+          new #{attrs.join ', '}
+        end
       end
 
       def initialize(#{args})
@@ -35,21 +49,19 @@ module Ivo
         #{equality_check}
       end
 
-      def eql?(other)
-        self == other
-      end
-
       def hash
         #{hash}
       end
     RUBY
 
-    Class.new do
-      class_eval code
+    Module.new do
+      module_eval code
 
       attr_reader *attrs
 
-      class_eval &block if block
+      def eql?(other)
+        self == other
+      end
     end
   end
 
