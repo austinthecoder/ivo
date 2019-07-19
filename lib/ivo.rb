@@ -7,25 +7,46 @@ module Ivo
   extend self
 
   def new(*attrs, &block)
-    Class.new do
-      include Ivo.value(*attrs)
+    instance_ruby = build_instance_ruby(attrs)
+    class_ruby = build_class_ruby(attrs)
 
+    Class.new do
+      instance_eval(instance_ruby)
+      class_eval(class_ruby)
       class_eval(&block) if block
     end
   end
 
   def value(*attrs)
-    code_template = <<~RUBY
-      def self.included(base)
-        base.extend ClassMethods
-      end
+    instance_ruby = build_instance_ruby(attrs)
+    class_ruby = build_class_ruby(attrs)
 
+    template = <<~RUBY
       module ClassMethods
-        def with(%{keyword_args})
-          new(%{values})
-        end
+        %{instance_ruby}
       end
 
+      def self.included(klass)
+        klass.extend(ClassMethods)
+      end
+    RUBY
+
+    ruby = template % {instance_ruby: instance_ruby}
+
+    Module.new do
+      module_eval(ruby)
+      module_eval(class_ruby)
+    end
+  end
+
+  def call(attrs = nil)
+    Value.new(attrs)
+  end
+
+  private
+
+  def build_class_ruby(attrs)
+    template = <<~RUBY
       %{attr_reader_declaration}
 
       def initialize(%{args})
@@ -44,17 +65,14 @@ module Ivo
       %{hash_method}
     RUBY
 
-    # a: nil, b: nil
-    keyword_args = attrs.map { |attr| "#{attr}: nil" }.join(', ')
-
-    # a, b
-    args = attrs.map { |attr| "#{attr} = nil" }.join(', ')
-
     # attr_reader :a, :b
     if attrs.any?
       arg_symbols = attrs.map { |attr| ":#{attr}" }.join(', ')
       attr_reader_declaration = "attr_reader #{arg_symbols}"
     end
+
+    # a, b
+    args = attrs.map { |attr| "#{attr} = nil" }.join(', ')
 
     # @a = a
     # @b = b
@@ -79,22 +97,27 @@ module Ivo
       RUBY
     end
 
-    code = code_template % {
-      keyword_args: keyword_args,
-      values: attrs.join(', '),
-      args: args,
+    template % {
       attr_reader_declaration: attr_reader_declaration,
+      args: args,
       instance_variable_assignments: instance_variable_assignments,
       equality_check: equality_check,
       hash_method: hash_method,
     }
-
-    Module.new do
-      module_eval(code)
-    end
   end
 
-  def call(attrs = nil)
-    Value.new(attrs)
+  def build_instance_ruby(attrs)
+    template = <<~RUBY
+      def with(%{keyword_args})
+        new(%{values})
+      end
+    RUBY
+
+    # a: nil, b: nil
+    keyword_args = attrs.map { |attr| "#{attr}: nil" }.join(', ')
+
+    values = attrs.join(', ')
+
+    template % {keyword_args: keyword_args, values: values}
   end
 end
