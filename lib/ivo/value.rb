@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Ivo
   class Value
     def initialize(data = nil)
@@ -25,7 +27,7 @@ module Ivo
     end
 
     def inspect
-      attributes = data.map { |key, value| "#{key}=#{value.inspect}" }.join ', '
+      attributes = data.map { |key, value| "#{key}=#{value.inspect}" }.join(', ')
       "#<#{self.class.name} #{attributes}>"
     end
 
