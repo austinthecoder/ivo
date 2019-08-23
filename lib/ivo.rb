@@ -47,29 +47,21 @@ module Ivo
 
   def build_class_ruby(attrs)
     template = <<~RUBY
-      %{attr_reader_declaration}
-
       def initialize(%{args})
         %{instance_variable_assignments}
         freeze
       end
 
+      %{attr_reader_declaration}
+
       def ==(other)
         %{equality_check}
       end
 
-      def eql?(other)
-        self == other
-      end
+      alias_method :eql?, :==
 
       %{hash_method}
     RUBY
-
-    # attr_reader :a, :b
-    if attrs.any?
-      arg_symbols = attrs.map { |attr| ":#{attr}" }.join(', ')
-      attr_reader_declaration = "attr_reader #{arg_symbols}"
-    end
 
     # a, b
     args = attrs.map { |attr| "#{attr} = nil" }.join(', ')
@@ -77,6 +69,12 @@ module Ivo
     # @a = a
     # @b = b
     instance_variable_assignments = attrs.map { |attr| "@#{attr} = #{attr}" }.join("\n")
+
+    # attr_reader :a, :b
+    if attrs.any?
+      arg_symbols = attrs.map { |attr| ":#{attr}" }.join(', ')
+      attr_reader_declaration = "attr_reader #{arg_symbols}"
+    end
 
     # self.class == other.class && a == other.a && b == other.b
     equality_check = begin
@@ -98,9 +96,9 @@ module Ivo
     end
 
     template % {
-      attr_reader_declaration: attr_reader_declaration,
       args: args,
       instance_variable_assignments: instance_variable_assignments,
+      attr_reader_declaration: attr_reader_declaration,
       equality_check: equality_check,
       hash_method: hash_method,
     }
