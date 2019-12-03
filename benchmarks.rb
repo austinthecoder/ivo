@@ -11,12 +11,14 @@ gemfile do
   gem 'ivo', '~> 0.4'
   gem 'immutable-struct', '~> 2.4'
   gem 'values', '~> 1.8'
+  gem 'concurrent-ruby', '~> 1.1'
 end
 
 StructClass = Struct.new(:x, :y)
 ImmutableStructClass = ImmutableStruct.new(:x, :y)
 ValueClass = Value.new(:x, :y)
 IvoClass = Ivo.new(:x, :y)
+ConcurrentImmutableStruct = Concurrent::ImmutableStruct.new(:x, :y)
 
 n = 1_000_000
 
@@ -36,6 +38,12 @@ Benchmark.bm(30) do |x|
   x.report('IvoClass.with') do
     n.times do
       IvoClass.with(x: 1, y: 2)
+    end
+  end
+
+  x.report('ConcurrentImmutableStruct.new') do
+    n.times do
+      ConcurrentImmutableStruct.new(1, 2)
     end
   end
 
