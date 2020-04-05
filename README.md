@@ -1,5 +1,7 @@
 # Ivo
 
+[![Build Status](https://travis-ci.com/austinthecoder/ivo.svg?branch=master)](https://travis-ci.com/austinthecoder/ivo)
+
 A library for creating immutable value objects.
 
 ## Installation
