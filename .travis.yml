@@ -1,6 +1,11 @@
 language: ruby
+os:
+  - osx
+  - linux
 rvm:
   - 2.5
   - 2.6
-  - jruby
-  - truffleruby
+before_install:
+  - yes | gem update --system --force
+  - gem install bundler
+script: bundle exec rspec
